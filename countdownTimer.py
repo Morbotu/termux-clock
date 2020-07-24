@@ -84,7 +84,7 @@ def alarm(showTime=False, enableSnooze=False):
         "--button1 'Stop alarm' --button1-action 'echo \"Alarm closed\" > /data/data/com.termux/files/home/intervalTimer/alarmOutput.txt' " + \
         "--on-delete 'echo \"Alarm closed\" > /data/data/com.termux/files/home/intervalTimer/alarmOutput.txt' " + "-i 1204"
     if enableSnooze:
-        notification += "--button2 'Snooze alarm' --button2-action 'echo \"Alarm snoozed\" > /data/data/com.termux/files/home/intervalTimer/alarmOutput.txt'"
+        notification += " --button2 'Snooze alarm' --button2-action 'echo \"Alarm snoozed\" > /data/data/com.termux/files/home/intervalTimer/alarmOutput.txt'"
     subprocess.call(notification, shell=True)
 
     while 1:
