@@ -7,16 +7,14 @@ import time
 import json
 import os
 
-subprocess.call("clear")
-
 
 def displayText(text, color):
     linesProcess = subprocess.Popen(
         "tput lines", stdout=subprocess.PIPE, shell=True)
     lines = int(linesProcess.stdout.read()[:-1])
-    collumsProcess = subprocess.Popen(
+    columnsProcess = subprocess.Popen(
         "tput cols", stdout=subprocess.PIPE, shell=True)
-    collums = int(collumsProcess.stdout.read()[:-1])
+    columns = int(columnsProcess.stdout.read()[:-1])
 
     text = text2art(text).split("\n")
     del text[-1]
@@ -27,14 +25,14 @@ def displayText(text, color):
     if lines % 2 != 0:
         spaceUnderTime += 1
     for i in range(spaceAboveTime):
-        output.append(" " * collums)
+        output.append(" " * columns)
 
     for i in text:
-        restSpace = " " * (int(collums/2) - int(len(i)/2))
+        restSpace = " " * (int(columns/2) - int(len(i)/2))
         output.append(restSpace + i[:-1] + restSpace)
 
     for i in range(spaceUnderTime):
-        output.append(" " * collums)
+        output.append(" " * columns)
 
     output = "\n".join(output)
     if color == "green":
@@ -43,6 +41,8 @@ def displayText(text, color):
         return "\u001b[41;1m" + output + "\u001b[0m"
     if color == "yellow":
         return "\u001b[43;1m" + output + "\u001b[0m"
+    if color == "black":
+        return "\u001b[40;1m" + output + "\u001b[0m"
 
 
 def timeToSeconds(normalTime):
@@ -55,11 +55,10 @@ def timeToSeconds(normalTime):
 
 
 def timer():
-    timer = subprocess.getoutput(
+    timerTime = subprocess.getoutput(
         "termux-dialog -t 'Select time' -i 'Format like h:m:s'")
-
-    timer = timeToSeconds(json.loads(timer)["text"])
-    endTime = round(time.time()) + timer
+    timerTime = timeToSeconds(json.loads(timerTime)["text"])
+    endTime = round(time.time()) + timerTime
 
     while 1:
         time.sleep(0.1)
@@ -71,7 +70,7 @@ def timer():
         else:
             color = "yellow"
         sys.stdout.write(
-            u"\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color))
+            "\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color))
         sys.stdout.flush()
         if color == "red":
             break
@@ -105,4 +104,23 @@ def alarm():
             pass
 
 
-timer()
+def alarmClock():
+    alarmTime = subprocess.getoutput("termux-dialog time -t 'Alarm'")
+    alarmTime = json.loads(alarmTime)["text"]
+    while 1:
+        time.sleep(0.1)
+        sys.stdout.write(
+            "\u001b[1000D" + displayText(datetime.now().strftime("%H:%M:%S"), "black"))
+        sys.stdout.flush()
+        if datetime.now().strftime("H%:M%") == alarmTime:
+            break
+    alarm()
+
+
+subprocess.call("clear")
+option = subprocess.getoutput("termux-dialog radio -v 'Timer,Alarm'")
+option = json.loads(option)["text"]
+if option == "Timer":
+    timer()
+if option == "Alarm":
+    alarmClock()
