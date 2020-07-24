@@ -150,7 +150,7 @@ def alarmClock():
 
 def clock():
     keyInput = subprocess.Popen(
-        "stty raw && dd bs=1 count=1 2> /dev/null && stty -raw", stdout=subprocess.PIPE, shell=True)
+        "stty raw && dd bs=1 count=1 2> /dev/null && stty -raw", stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
 
     while 1:
         time.sleep(0.1)
