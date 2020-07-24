@@ -148,10 +148,20 @@ def alarmClock():
                 break
 
 
+def clock():
+    while 1:
+        time.sleep(0.1)
+        sys.stdout.write(
+            "\u001b[1000D" + displayText(datetime.now().strftime("%H:%M:%S"), "black"))
+        sys.stdout.flush()
+
+
 subprocess.call("clear")
-option = subprocess.getoutput("termux-dialog radio -v 'Timer,Alarm'")
+option = subprocess.getoutput("termux-dialog radio -v 'Timer,Alarm,Clock'")
 option = json.loads(option)["text"]
 if option == "Timer":
     timer()
 if option == "Alarm":
     alarmClock()
+if option == "Clock":
+    clock()
