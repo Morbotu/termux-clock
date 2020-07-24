@@ -77,13 +77,17 @@ def timer():
     alarm()
 
 
-def alarm():
+def alarm(showTime=False):
     turnOff = subprocess.Popen(
         "termux-dialog confirm -t 'Turn off' -i ''", stdout=subprocess.PIPE, shell=True)
     subprocess.call("termux-notification -t 'Alarm' --button1 'Stop alarm' --button1-action 'echo \"Pressed\" > /data/data/com.termux/files/home/intervalTimer/pressed.txt' --on-delete 'echo \"Pressed\" > /data/data/com.termux/files/home/intervalTimer/pressed.txt' -i 1204", shell=True)
 
     while 1:
         playbeep()
+        if showTime:
+            sys.stdout.write(
+                "\u001b[1000D" + displayText(datetime.now().strftime("%H:%M:%S"), "black"))
+            sys.stdout.flush()
         turnOff.poll()
         if turnOff.returncode != None:
             if json.loads(turnOff.stdout.read())["text"] == "yes":
@@ -114,7 +118,7 @@ def alarmClock():
         sys.stdout.flush()
         if datetime.now().strftime("%H:%M") == alarmTime:
             break
-    alarm()
+    alarm(True)
 
 
 subprocess.call("clear")
