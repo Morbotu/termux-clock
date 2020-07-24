@@ -112,7 +112,7 @@ def alarmClock():
         sys.stdout.write(
             "\u001b[1000D" + displayText(datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
-        if datetime.now().strftime("H%:M%") == alarmTime:
+        if datetime.now().strftime("%H:%M") == alarmTime:
             break
     alarm()
 
