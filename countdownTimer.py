@@ -6,6 +6,9 @@ from datetime import datetime, timedelta
 import time
 import json
 import os
+import tty
+import termios
+import fcntl
 
 
 def displayText(text, color):
@@ -149,24 +152,23 @@ def alarmClock():
 
 
 def clock():
-    keyInput = subprocess.Popen(
-        "stty raw && dd bs=1 count=1 2> /dev/null && stty -raw", stdout=subprocess.PIPE, stdin=subprocess.DEVNULL, shell=True)
-
+    fd = sys.stdin.fileno()
+    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+    old = tty.tcgetattr(fd)
+    tty.setcbreak(fd)
+    input = ""
     while 1:
         time.sleep(0.1)
         sys.stdout.write(
             "\u001b[1000D" + displayText(datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
-        keyInput.poll()
-        if keyInput.returncode != None:
-            if keyInput.stdout.read() == "q":
-                break
-            else:
-                keyInput = subprocess.Popen(
-                    "stty raw && dd bs=1 count=1 2> /dev/null && stty -raw", stdout=subprocess.PIPE, stdin=subprocess.DEVNULL, shell=True)
+        if sys.stdin.read(1) == "q":
+            tty.tcsetattr(fd, tty.TCSAFLUSH, old)
+            break
 
 
-subprocess.call("clear")
+sys.stdout.write("\u001b[2J\u001b[0m")
 option = subprocess.getoutput("termux-dialog radio -v 'Timer,Alarm,Clock'")
 option = json.loads(option)["text"]
 if option == "Timer":
