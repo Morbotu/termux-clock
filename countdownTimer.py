@@ -149,11 +149,21 @@ def alarmClock():
 
 
 def clock():
+    keyInput = subprocess.Popen(
+        "stty raw && read -n1 ans && echo $ans && stty -raw")
+
     while 1:
         time.sleep(0.1)
         sys.stdout.write(
             "\u001b[1000D" + displayText(datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
+        keyInput.poll()
+        if keyInput.returncode != None:
+            if keyInput == "q":
+                break
+            else:
+                keyInput = subprocess.Popen(
+                    "stty raw && read -n1 ans && echo $ans && stty -raw")
 
 
 subprocess.call("clear")
