@@ -150,7 +150,7 @@ def alarmClock():
 
 def clock():
     keyInput = subprocess.Popen(
-        "stty raw && read -n1 ans && echo $ans && stty -raw")
+        "stty raw && read -n1 ans && echo $ans && stty -raw", shell=True)
 
     while 1:
         time.sleep(0.1)
@@ -163,7 +163,7 @@ def clock():
                 break
             else:
                 keyInput = subprocess.Popen(
-                    "stty raw && read -n1 ans && echo $ans && stty -raw")
+                    "stty raw && read -n1 ans && echo $ans && stty -raw", shell=True)
 
 
 subprocess.call("clear")
