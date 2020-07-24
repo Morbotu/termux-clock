@@ -122,10 +122,10 @@ def alarm(showTime=False, enableSnooze=False):
 def addFiveMinutes(alarmTime):
     alarmTime = alarmTime.split(":")
     alarmTime[1] = str(int(alarmTime[1]) + 5)
-    if alarmTime[1] >= 60:
+    if int(alarmTime[1]) >= 60:
         alarmTime[1] = str(int(alarmTime[1]) % 60)
         alarmTime[0] = str(int(alarmTime[0]) + 1)
-        if alarmTime[0] >= 24:
+        if int(alarmTime[0]) >= 24:
             alarmTime[0] = str(int(alarmTime[0]) % 24)
     return ":".join(alarmTime)
 
