@@ -144,7 +144,7 @@ def alarm(showTime=False, enableSnooze=False):
 
 def addFiveMinutes(alarmTime):
     alarmTime = alarmTime.split(":")
-    alarmTime[1] = str(int(alarmTime[1]) + 1)
+    alarmTime[1] = str(int(alarmTime[1]) + 5)
     if int(alarmTime[1]) >= 60:
         alarmTime[1] = str(int(alarmTime[1]) % 60)
         alarmTime[0] = str(int(alarmTime[0]) + 1)
@@ -156,7 +156,7 @@ def addFiveMinutes(alarmTime):
 def alarmClock():
     alarmTime = subprocess.getoutput("termux-dialog time -t 'Alarm'")
     alarmTime = json.loads(alarmTime)["text"]
-
+    showAlarmTime = False
     fd = sys.stdin.fileno()
     fl = fcntl.fcntl(fd, fcntl.F_GETFL)
     fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
@@ -164,7 +164,10 @@ def alarmClock():
     tty.setcbreak(fd)
     while 1:
         time.sleep(0.1)
-        sys.stdout.write(
+        if showAlarmTime:
+            sys.stdout.write("\u001b[1000D" + displayText(alarmTime, "black"))
+        else:
+            sys.stdout.write(
             "\u001b[1000D" + displayText(datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
         if datetime.now().strftime("%H:%M") == alarmTime:
@@ -174,9 +177,12 @@ def alarmClock():
                 alarmTime = addFiveMinutes(alarmTime)
             else:
                 break
-        if sys.stdin.read(1) == "q":
+        keyInput = sys.stdin.read(1)
+        if keyInput == "q":
             tty.tcsetattr(fd, tty.TCSAFLUSH, old)
             break
+        if keyInput == "s":
+            showAlarmTime = not showAlarmTime
 
 
 def clock():
