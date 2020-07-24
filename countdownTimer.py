@@ -7,7 +7,6 @@ import time
 import json
 import os
 import tty
-import termios
 import fcntl
 
 
