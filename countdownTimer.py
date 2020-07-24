@@ -65,7 +65,7 @@ while 1:
         color = "yellow"
     sys.stdout.write(u"\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color)) 
     sys.stdout.flush()
-    if color == "red":        
+    if color == "red":
         break
 
 turnOff = subprocess.Popen("termux-dialog confirm -t 'Turn off' -i ''", stdout=subprocess.PIPE, shell=True)
