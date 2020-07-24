@@ -111,6 +111,8 @@ def alarm(showTime=False, enableSnooze=False):
                         "/data/data/com.termux/files/home/intervalTimer/alarmOutput.txt")
                     break
                 if output == "Alarm snoozed\n":
+                    subprocess.call(
+                        "termux-notification-remove 1204", shell=True)
                     os.remove(
                         "/data/data/com.termux/files/home/intervalTimer/alarmOutput.txt")
                     return True
@@ -121,7 +123,7 @@ def alarm(showTime=False, enableSnooze=False):
 
 def addFiveMinutes(alarmTime):
     alarmTime = alarmTime.split(":")
-    alarmTime[1] = str(int(alarmTime[1]) + 5)
+    alarmTime[1] = str(int(alarmTime[1]) + 1)
     if int(alarmTime[1]) >= 60:
         alarmTime[1] = str(int(alarmTime[1]) % 60)
         alarmTime[0] = str(int(alarmTime[0]) + 1)
