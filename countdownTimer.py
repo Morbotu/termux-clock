@@ -159,7 +159,7 @@ def clock():
         sys.stdout.flush()
         keyInput.poll()
         if keyInput.returncode != None:
-            if keyInput == "q":
+            if keyInput.stdout.read() == "q":
                 break
             else:
                 keyInput = subprocess.Popen(
