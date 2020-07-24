@@ -49,42 +49,47 @@ def timeToSeconds(normalTime):
     timeInMillis += int(normalTime[2])
     return timeInMillis
 
-timer = subprocess.getoutput("termux-dialog -t 'Select time' -i 'Format like h:m:s'")
-
-timer = timeToSeconds(json.loads(timer)["text"])
-endTime = round(time.time()) + timer
-
-while 1:
-    time.sleep(0.1)
-    timeLeft = endTime-round(time.time())
-    if timeLeft > 5:
-        color = "green"
-    elif timeLeft <= 0:
-        color = "red" 
-    else:
-        color = "yellow"
-    sys.stdout.write(u"\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color)) 
-    sys.stdout.flush()
-    if color == "red":
-        break
-
-turnOff = subprocess.Popen("termux-dialog confirm -t 'Turn off' -i ''", stdout=subprocess.PIPE, shell=True)
-subprocess.call("termux-notification -t 'Alarm' --button1 'Stop alarm' --button1-action 'echo \"Pressed\" > /data/data/com.termux/files/home/intervalTimer/pressed.txt' --on-delete 'echo \"Pressed\" > /data/data/com.termux/files/home/intervalTimer/pressed.txt' -i 1204", shell=True)
-
-while 1:
-    playbeep()
-    turnOff.poll()
-    if turnOff.returncode != None:
-        if json.loads(turnOff.stdout.read())["text"] == "yes":
-            subprocess.call("termux-notification-remove 1204", shell=True)
-            break
+def timer():
+    timer = subprocess.getoutput("termux-dialog -t 'Select time' -i 'Format like h:m:s'")
+    
+    timer = timeToSeconds(json.loads(timer)["text"])
+    endTime = round(time.time()) + timer
+    
+    while 1:
+        time.sleep(0.1)
+        timeLeft = endTime-round(time.time())
+        if timeLeft > 5:
+            color = "green"
+        elif timeLeft <= 0:
+            color = "red" 
         else:
-            turnOff = subprocess.Popen("termux-dialog confirm -t 'Turn off' -i ''", stdout=subprocess.PIPE, shell=True)
-    try:
-        with open("/data/data/com.termux/files/home/intervalTimer/pressed.txt", "r") as f:
-            if f.read() == "Pressed\n":
+            color = "yellow"
+        sys.stdout.write(u"\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color)) 
+        sys.stdout.flush()
+        if color == "red":
+            break
+    alarm()
+
+def alarm():
+    turnOff = subprocess.Popen("termux-dialog confirm -t 'Turn off' -i ''", stdout=subprocess.PIPE, shell=True)
+    subprocess.call("termux-notification -t 'Alarm' --button1 'Stop alarm' --button1-action 'echo \"Pressed\" > /data/data/com.termux/files/home/intervalTimer/pressed.txt' --on-delete 'echo \"Pressed\" > /data/data/com.termux/files/home/intervalTimer/pressed.txt' -i 1204", shell=True)
+    
+    while 1:
+        playbeep()
+        turnOff.poll()
+        if turnOff.returncode != None:
+            if json.loads(turnOff.stdout.read())["text"] == "yes":
                 subprocess.call("termux-notification-remove 1204", shell=True)
-                os.remove("/data/data/com.termux/files/home/intervalTimer/pressed.txt")
                 break
-    except:
-        pass
+            else:
+                turnOff = subprocess.Popen("termux-dialog confirm -t 'Turn off' -i ''", stdout=subprocess.PIPE, shell=True)
+        try:
+            with open("/data/data/com.termux/files/home/intervalTimer/pressed.txt", "r") as f:
+                if f.read() == "Pressed\n":
+                    subprocess.call("termux-notification-remove 1204", shell=True)
+                    os.remove("/data/data/com.termux/files/home/intervalTimer/pressed.txt")
+                    break
+        except:
+            pass
+
+timer()
