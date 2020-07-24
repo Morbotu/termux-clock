@@ -157,6 +157,13 @@ def clock():
         sys.stdout.write(
             "\u001b[1000D" + displayText(datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
+        keyInput.poll()
+        if keyInput.returncode != None:
+            if keyInput.stdout.read() == "q":
+                break
+            else:
+                keyInput = subprocess.Popen(
+                    "stty raw && dd bs=1 count=1 2> /dev/null && stty -raw", stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
 
 
 subprocess.call("clear")
