@@ -77,10 +77,15 @@ def timer():
     alarm()
 
 
-def alarm(showTime=False):
+def alarm(showTime=False, enableSnooze=False):
     turnOff = subprocess.Popen(
         "termux-dialog confirm -t 'Turn off' -i ''", stdout=subprocess.PIPE, shell=True)
-    subprocess.call("termux-notification -t 'Alarm' --button1 'Stop alarm' --button1-action 'echo \"Pressed\" > /data/data/com.termux/files/home/intervalTimer/pressed.txt' --on-delete 'echo \"Pressed\" > /data/data/com.termux/files/home/intervalTimer/pressed.txt' -i 1204", shell=True)
+    notification = "termux-notification -t 'Alarm'" + \
+        "--button1 'Stop alarm' --button1-action 'echo \"Alarm closed\" > /data/data/com.termux/files/home/intervalTimer/alarmOutput.txt'" + \
+        "--on-delete 'echo \"Alarm closed\" > /data/data/com.termux/files/home/intervalTimer/alarmOutput.txt'" + "-i 1204"
+    if enableSnooze:
+        notification += "--button2 'Snooze alarm' --button2-action 'echo \"Alarm snoozed\" > /data/data/com.termux/files/home/intervalTimer/alarmOutput.txt'"
+    subprocess.call(notification, shell=True)
 
     while 1:
         playbeep()
@@ -97,15 +102,32 @@ def alarm(showTime=False):
                 turnOff = subprocess.Popen(
                     "termux-dialog confirm -t 'Turn off' -i ''", stdout=subprocess.PIPE, shell=True)
         try:
-            with open("/data/data/com.termux/files/home/intervalTimer/pressed.txt", "r") as f:
-                if f.read() == "Pressed\n":
+            with open("/data/data/com.termux/files/home/intervalTimer/alarmOutput.txt", "r") as f:
+                output = f.read()
+                if output == "Alarm closed\n":
                     subprocess.call(
                         "termux-notification-remove 1204", shell=True)
                     os.remove(
-                        "/data/data/com.termux/files/home/intervalTimer/pressed.txt")
+                        "/data/data/com.termux/files/home/intervalTimer/alarmOutput.txt")
                     break
+                if output == "Alarm snoozed\n":
+                    os.remove(
+                        "/data/data/com.termux/files/home/intervalTimer/alarmOutput.txt")
+                    return True
         except:
-            pass
+            continue
+        return False
+
+
+def addFiveMinutes(alarmTime):
+    alarmTime = alarmTime.split(":")
+    alarmTime[1] = str(int(alarmTime[1]) + 5)
+    if alarmTime[1] >= 60:
+        alarmTime[1] = str(int(alarmTime[1]) % 60)
+        alarmTime[0] = str(int(alarmTime[0]) + 1)
+        if alarmTime[0] >= 24:
+            alarmTime[0] = str(int(alarmTime[0]) % 24)
+    return ":".join(alarmTime)
 
 
 def alarmClock():
@@ -117,8 +139,11 @@ def alarmClock():
             "\u001b[1000D" + displayText(datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
         if datetime.now().strftime("%H:%M") == alarmTime:
-            break
-    alarm(True)
+            snooze = alarm(True, True)
+            if snooze:
+                alarmTime = addFiveMinutes(alarmTime)
+            else:
+                break
 
 
 subprocess.call("clear")
