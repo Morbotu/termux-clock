@@ -1,4 +1,3 @@
-from playbeep import playbeep
 import subprocess
 import sys
 from art import text2art
@@ -10,17 +9,29 @@ import tty
 import fcntl
 
 
+def playbeep():
+    subprocess.call(["termux-media-player", "play", "~/termux-timer/sounds/beep-09.mp3"],
+                    stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+
+
+lastLines = []
+
+
 def displayText(text, color):
     global lastLines
-    goBackLines = lastLines - 1
     linesProcess = subprocess.Popen(
         "tput lines", stdout=subprocess.PIPE, shell=True)
     lines = int(linesProcess.stdout.read()[:-1])
     columnsProcess = subprocess.Popen(
         "tput cols", stdout=subprocess.PIPE, shell=True)
     columns = int(columnsProcess.stdout.read()[:-1])
+    if lines >= max(lastLines):
+        goBackLines = lastLines[-1]
+        lastLines.append(lines)
+    else:
+        lastLines.append(lastLines.pop(lastLines.index(lines)))
+        goBackLines = lines
 
-    lastLines = lines
     text = text2art(text).split("\n")
     del text[-1]
 
@@ -66,11 +77,6 @@ def timer():
     timerTime = timeToSeconds(json.loads(timerTime)["text"])
     endTime = round(time.time()) + timerTime
     quit = False
-    fd = sys.stdin.fileno()
-    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    old = tty.tcgetattr(fd)
-    tty.setcbreak(fd)
     while 1:
         time.sleep(0.1)
         timeLeft = endTime-round(time.time())
@@ -88,7 +94,6 @@ def timer():
         if sys.stdin.read(1) == "q":
             quit = True
             break
-    tty.tcsetattr(fd, tty.TCSAFLUSH, old)
     if not quit:
         alarm()
 
@@ -97,17 +102,12 @@ def alarm(showTime=False, enableSnooze=False):
     turnOff = subprocess.Popen(
         "termux-dialog confirm -t 'Turn off' -i ''", stdout=subprocess.PIPE, shell=True)
     notification = "termux-notification -t 'Alarm' " + \
-        "--button1 'Stop alarm' --button1-action 'echo \"Alarm closed\" > /data/data/com.termux/files/home/intervalTimer/alarmOutput.txt' " + \
-        "--on-delete 'echo \"Alarm closed\" > /data/data/com.termux/files/home/intervalTimer/alarmOutput.txt' " + "-i 1204"
+        "--button1 'Stop alarm' --button1-action 'echo \"Alarm closed\" > ~/termux-timer/alarmOutput.txt' " + \
+        "--on-delete 'echo \"Alarm closed\" > ~/termux-timer/alarmOutput.txt' " + "-i 1204"
     if enableSnooze:
-        notification += " --button2 'Snooze alarm' --button2-action 'echo \"Alarm snoozed\" > /data/data/com.termux/files/home/intervalTimer/alarmOutput.txt'"
+        notification += " --button2 'Snooze alarm' --button2-action 'echo \"Alarm snoozed\" > ~/termux-timer/alarmOutput.txt'"
     subprocess.call(notification, shell=True)
 
-    fd = sys.stdin.fileno()
-    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    old = tty.tcgetattr(fd)
-    tty.setcbreak(fd)
     while 1:
         playbeep()
         if showTime:
@@ -126,23 +126,22 @@ def alarm(showTime=False, enableSnooze=False):
         if sys.stdin.read(1) == "q":
             break
         try:
-            with open("/data/data/com.termux/files/home/intervalTimer/alarmOutput.txt", "r") as f:
+            with open("~/termux-timer/alarmOutput.txt", "r") as f:
                 output = f.read()
                 if output == "Alarm closed\n":
                     subprocess.call(
                         "termux-notification-remove 1204", shell=True)
                     os.remove(
-                        "/data/data/com.termux/files/home/intervalTimer/alarmOutput.txt")
+                        "~/termux-timer/alarmOutput.txt")
                     break
                 if output == "Alarm snoozed\n":
                     subprocess.call(
                         "termux-notification-remove 1204", shell=True)
                     os.remove(
-                        "/data/data/com.termux/files/home/intervalTimer/alarmOutput.txt")
+                        "~/termux-timer/alarmOutput.txt")
                     return True
         except:
             continue
-    tty.tcsetattr(fd, tty.TCSAFLUSH, old)
     return False
 
 
@@ -161,20 +160,15 @@ def alarmClock():
     alarmTime = subprocess.getoutput("termux-dialog time -t 'Alarm'")
     alarmTime = json.loads(alarmTime)["text"]
     showAlarmTime = False
-    fd = sys.stdin.fileno()
-    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    old = tty.tcgetattr(fd)
-    tty.setcbreak(fd)
     while 1:
         time.sleep(0.1)
         if showAlarmTime:
             sys.stdout.write(displayText(alarmTime, "black"))
         else:
-            sys.stdout.write(displayText(datetime.now().strftime("%H:%M:%S"), "black"))
+            sys.stdout.write(displayText(
+                datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
         if datetime.now().strftime("%H:%M") == alarmTime:
-            tty.tcsetattr(fd, tty.TCSAFLUSH, old)
             snooze = alarm(True, True)
             if snooze:
                 alarmTime = addFiveMinutes(alarmTime)
@@ -182,31 +176,30 @@ def alarmClock():
                 break
         keyInput = sys.stdin.read(1)
         if keyInput == "q":
-            tty.tcsetattr(fd, tty.TCSAFLUSH, old)
             break
         if keyInput == "s":
             showAlarmTime = not showAlarmTime
 
 
 def clock():
-    fd = sys.stdin.fileno()
-    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    old = tty.tcgetattr(fd)
-    tty.setcbreak(fd)
     while 1:
-        time.sleep(0.1)  
-        sys.stdout.write(displayText(datetime.now().strftime("%H:%M:%S"), "black"))
+        time.sleep(0.1)
+        sys.stdout.write(displayText(
+            datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
         if sys.stdin.read(1) == "q":
-            tty.tcsetattr(fd, tty.TCSAFLUSH, old)
             break
 
+
+fd = sys.stdin.fileno()
+fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+old = tty.tcgetattr(fd)
+tty.setcbreak(fd)
 linesProcess = subprocess.Popen(
     "tput lines", stdout=subprocess.PIPE, shell=True)
-lastLines = int(linesProcess.stdout.read()[:-1])
-sys.stdout.write("\u001b[s\u001b[0m" + "\n" * (lastLines - 1))
-sys.stdout.write("\u001b[100F\u001b[s")
+lastLines.append(int(linesProcess.stdout.read()[:-1]))
+sys.stdout.write("\033[?47h\u001b[0m")
 option = subprocess.getoutput("termux-dialog radio -v 'Timer,Alarm,Clock'")
 option = json.loads(option)["text"]
 if option == "Timer":
@@ -215,5 +208,5 @@ if option == "Alarm":
     alarmClock()
 if option == "Clock":
     clock()
-sys.stdout.write("\u001b[100F\u001b[0J")
-
+sys.stdout.write("\033[?47l\u001b[0J")
+tty.tcsetattr(fd, tty.TCSAFLUSH, old)
