@@ -210,6 +210,8 @@ def intervalTimer():
             "\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color))
         sys.stdout.flush()
         if timeLeft <= 0:
+            for i in range(3):
+                beepsDone[i] = False
             if currentAction == "rest":
                 intervals -= 1
                 if intervals == 0:
