@@ -15,7 +15,7 @@ def playbeep():
 
 
 def playbeepWithOutPause():
-    subprocess.Popen("termux-media-player play /data/data/com.termux/files/home/termux-clock/sounds/beep-09.mp3 && termux-media-player play /data/data/com.termux/files/home/termux-clock/sounds/beep-09.mp3 && termux-media-player play /data/data/com.termux/files/home/termux-clock/sounds/beep-09.mp3",
+    subprocess.Popen("termux-media-player stop && termux-media-player play /data/data/com.termux/files/home/termux-clock/sounds/beep-06.mp3",
                      stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, shell=True)
 
 
@@ -198,14 +198,16 @@ def intervalTimer():
         rest = timeToSeconds(rest, True)
         endTime = round(time.time()) + work
         currentAction = "work"
+        beepsDone = [False, False, False]
     while 1:
         timeLeft = endTime-round(time.time())
         if currentAction == "work":
             color = "red"
         elif currentAction == "rest":
             color = "green"
-        if timeLeft == 3:
+        if timeLeft <= 3 and not beepsDone[timeLeft-1]:
             playbeepWithOutPause()
+            beepsDone[timeLeft-1] = True
         sys.stdout.write(
             "\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color))
         sys.stdout.flush()
