@@ -11,6 +11,8 @@ import fcntl
 
 
 def displayText(text, color):
+    global lastLines
+    goBackLines = lastLines
     linesProcess = subprocess.Popen(
         "tput lines", stdout=subprocess.PIPE, shell=True)
     lines = int(linesProcess.stdout.read()[:-1])
@@ -18,6 +20,7 @@ def displayText(text, color):
         "tput cols", stdout=subprocess.PIPE, shell=True)
     columns = int(columnsProcess.stdout.read()[:-1])
 
+    lastLines = lines
     text = text2art(text).split("\n")
     del text[-1]
 
@@ -30,21 +33,22 @@ def displayText(text, color):
         output.append(" " * columns)
 
     for i in text:
-        restSpace = " " * (int(columns/2) - int(len(i)/2))
-        output.append(restSpace + i[:-1] + restSpace)
+        spaceLeft = " " * (int(columns/2) - int(len(i)/2))
+        spaceRight = " " * (columns - len(i) - len(spaceLeft) + 1)
+        output.append(spaceLeft + i[:-1] + spaceRight)
 
     for i in range(spaceUnderTime):
         output.append(" " * columns)
 
     output = "\n".join(output)
     if color == "green":
-        return "\u001b[42;1m" + output + "\u001b[0m"
+        return "\u001b[" + str(goBackLines) + "F\u001b[42;1m" + output + "\u001b[0m"
     if color == "red":
-        return "\u001b[41;1m" + output + "\u001b[0m"
+        return "\u001b[" + str(goBackLines) + "F\u001b[41;1m" + output + "\u001b[0m"
     if color == "yellow":
-        return "\u001b[43;1m" + output + "\u001b[0m"
+        return "\u001b[" + str(goBackLines) + "F\u001b[43;1m" + output + "\u001b[0m"
     if color == "black":
-        return "\u001b[40;1m" + output + "\u001b[0m"
+        return "\u001b[" + str(goBackLines) + "F\u001b[40;1m" + output + "\u001b[0m"
 
 
 def timeToSeconds(normalTime):
@@ -108,7 +112,7 @@ def alarm(showTime=False, enableSnooze=False):
         playbeep()
         if showTime:
             sys.stdout.write(
-                "\u001b[1000D" + displayText(datetime.now().strftime("%H:%M:%S"), "black"))
+                displayText(datetime.now().strftime("%H:%M:%S"), "black"))
             sys.stdout.flush()
         turnOff.poll()
         if turnOff.returncode != None:
@@ -165,10 +169,9 @@ def alarmClock():
     while 1:
         time.sleep(0.1)
         if showAlarmTime:
-            sys.stdout.write("\u001b[1000D" + displayText(alarmTime, "black"))
+            sys.stdout.write(displayText(alarmTime, "black"))
         else:
-            sys.stdout.write(
-            "\u001b[1000D" + displayText(datetime.now().strftime("%H:%M:%S"), "black"))
+            sys.stdout.write(displayText(datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
         if datetime.now().strftime("%H:%M") == alarmTime:
             tty.tcsetattr(fd, tty.TCSAFLUSH, old)
@@ -192,16 +195,18 @@ def clock():
     old = tty.tcgetattr(fd)
     tty.setcbreak(fd)
     while 1:
-        time.sleep(0.1)
-        sys.stdout.write(
-            "\u001b[1000D" + displayText(datetime.now().strftime("%H:%M:%S"), "black"))
+        time.sleep(0.1)  
+        sys.stdout.write(displayText(datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
         if sys.stdin.read(1) == "q":
             tty.tcsetattr(fd, tty.TCSAFLUSH, old)
             break
 
-
-sys.stdout.write("\u001b[2J\u001b[0m")
+linesProcess = subprocess.Popen(
+    "tput lines", stdout=subprocess.PIPE, shell=True)
+lastLines = int(linesProcess.stdout.read()[:-1])
+sys.stdout.write("\u001b[s\u001b[0m" + "\n" * (lastLines - 1))
+sys.stdout.write("\u001b[100F\u001b[s")
 option = subprocess.getoutput("termux-dialog radio -v 'Timer,Alarm,Clock'")
 option = json.loads(option)["text"]
 if option == "Timer":
@@ -210,3 +215,5 @@ if option == "Alarm":
     alarmClock()
 if option == "Clock":
     clock()
+sys.stdout.write("\u001b[100F\u001b[0J")
+
