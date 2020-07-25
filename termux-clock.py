@@ -52,10 +52,11 @@ def displayText(text, color):
         return "\u001b[100F\u001b[40;1m" + output + "\u001b[0m"
 
 
-def timeToSeconds(normalTime):
+def timeToSeconds(normalTime, noHours=False):
     normalTime = normalTime.split(":")
     timeInMillis = 0
-    timeInMillis += int(normalTime[0]) * 3600
+    if not noHours:
+        timeInMillis += int(normalTime[0]) * 3600
     timeInMillis += int(normalTime[1]) * 60
     timeInMillis += int(normalTime[2])
     return timeInMillis
@@ -174,28 +175,39 @@ def alarmClock():
 def intervalTimer():
     intervalOption = json.loads(subprocess.getoutput(
         "termux-dialog radio -v 'Interval repeat,Interval variable'"))["text"]
-    intervals = json.loads(subprocess.getoutput(
-        "termux-dialog -r '1, 100, 2' -t 'Intervals'"))["text"]
-    quit = False
-    endTime = 0
+    if intervalOption == "Interval repeat":
+        work = json.loads(subprocess.getoutput(
+            "termux-dialog -t 'Work' -i 'Format like m:s'"))["text"]
+        if len([i for i in work.split(":") if i.isdigit()]) != 2:
+            return
+        rest = json.loads(subprocess.getoutput(
+            "termux-dialog -t 'Rest' -i 'Format like m:s'"))["text"]
+        if len([i for i in rest.split(":") if i.isdigit()]) != 2:
+            return
+        intervals = json.loads(subprocess.getoutput(
+            "termux-dialog -r '1, 100, 2' -t 'Intervals'"))["text"]
+        work = timeToSeconds(work, True)
+        rest = timeToSeconds(work, True)
+        endTime = round(time.time()) + work
+        currentAction = "work"
     while 1:
         timeLeft = endTime-round(time.time())
-        if timeLeft > 5:
-            color = "green"
-        elif timeLeft <= 0:
+        if currentAction == "work":
             color = "red"
-        else:
-            color = "yellow"
+        elif currentAction == "rest":
+            color = "green"
         sys.stdout.write(
             "\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color))
         sys.stdout.flush()
-        if color == "red":
-            break
+        if endTime-round(time.time()) <= 0:
+            if currentAction == "rest":
+                intervals -= 1
+                if intervals == 0:
+                    break
+            endTime = round(time.time()) + rest
+            currentAction = "rest"
         if sys.stdin.read(1) == "q":
-            quit = True
             break
-    if not quit:
-        alarm()
 
 
 def clock():
