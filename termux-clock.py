@@ -12,7 +12,7 @@ import fcntl
 
 def displayText(text, color):
     global lastLines
-    goBackLines = lastLines
+    goBackLines = lastLines - 1
     linesProcess = subprocess.Popen(
         "tput lines", stdout=subprocess.PIPE, shell=True)
     lines = int(linesProcess.stdout.read()[:-1])
