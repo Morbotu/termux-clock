@@ -10,7 +10,7 @@ import fcntl
 
 
 def playbeep():
-    subprocess.call(["termux-media-player", "play", "$HOME/termux-clock/sounds/beep-09.mp3"],
+    subprocess.call(["termux-media-player", "play", "/data/data/com.termux/files/home/termux-clock/sounds/beep-09.mp3"],
                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
 
@@ -94,10 +94,10 @@ def alarm(showTime=False, enableSnooze=False):
     turnOff = subprocess.Popen(
         "termux-dialog confirm -t 'Turn off' -i ''", stdout=subprocess.PIPE, shell=True)
     notification = "termux-notification -t 'Alarm' " + \
-        "--button1 'Stop alarm' --button1-action 'echo \"Alarm closed\" > $HOME/termux-clock/alarmOutput.txt' " + \
-        "--on-delete 'echo \"Alarm closed\" > $HOME/termux-clock/alarmOutput.txt' " + "-i 1204"
+        "--button1 'Stop alarm' --button1-action 'echo \"Alarm closed\" > /data/data/com.termux/files/home/termux-clock/alarmOutput.txt' " + \
+        "--on-delete 'echo \"Alarm closed\" > /data/data/com.termux/files/home/termux-clock/alarmOutput.txt' " + "-i 1204"
     if enableSnooze:
-        notification += " --button2 'Snooze alarm' --button2-action 'echo \"Alarm snoozed\" > $HOME/termux-clock/alarmOutput.txt'"
+        notification += " --button2 'Snooze alarm' --button2-action 'echo \"Alarm snoozed\" > /data/data/com.termux/files/home/termux-clock/alarmOutput.txt'"
     subprocess.call(notification, shell=True)
 
     while 1:
@@ -118,19 +118,19 @@ def alarm(showTime=False, enableSnooze=False):
         if sys.stdin.read(1) == "q":
             break
         try:
-            with open("$HOME/termux-clock/alarmOutput.txt", "r") as f:
+            with open("/data/data/com.termux/files/home/termux-clock/alarmOutput.txt", "r") as f:
                 output = f.read()
                 if output == "Alarm closed\n":
                     subprocess.call(
                         "termux-notification-remove 1204", shell=True)
                     os.remove(
-                        "$HOME/termux-clock/alarmOutput.txt")
+                        "/data/data/com.termux/files/home/termux-clock/alarmOutput.txt")
                     break
                 if output == "Alarm snoozed\n":
                     subprocess.call(
                         "termux-notification-remove 1204", shell=True)
                     os.remove(
-                        "$HOME/termux-clock/alarmOutput.txt")
+                        "/data/data/com.termux/files/home/termux-clock/alarmOutput.txt")
                     return True
         except:
             continue
