@@ -202,7 +202,7 @@ def intervalTimer():
         sys.stdout.write(
             "\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color))
         sys.stdout.flush()
-        if endTime-round(time.time()) <= 0:
+        if timeLeft <= 0:
             playbeep()
             if currentAction == "rest":
                 intervals -= 1
