@@ -73,11 +73,6 @@ def timer():
     timerTime = timeToSeconds(json.loads(timerTime)["text"])
     endTime = round(time.time()) + timerTime
     quit = False
-    fd = sys.stdin.fileno()
-    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    old = tty.tcgetattr(fd)
-    tty.setcbreak(fd)
     while 1:
         time.sleep(0.1)
         timeLeft = endTime-round(time.time())
@@ -95,7 +90,6 @@ def timer():
         if sys.stdin.read(1) == "q":
             quit = True
             break
-    tty.tcsetattr(fd, tty.TCSAFLUSH, old)
     if not quit:
         alarm()
 
@@ -110,11 +104,6 @@ def alarm(showTime=False, enableSnooze=False):
         notification += " --button2 'Snooze alarm' --button2-action 'echo \"Alarm snoozed\" > ~/termux-timer/alarmOutput.txt'"
     subprocess.call(notification, shell=True)
 
-    fd = sys.stdin.fileno()
-    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    old = tty.tcgetattr(fd)
-    tty.setcbreak(fd)
     while 1:
         playbeep()
         if showTime:
@@ -149,7 +138,6 @@ def alarm(showTime=False, enableSnooze=False):
                     return True
         except:
             continue
-    tty.tcsetattr(fd, tty.TCSAFLUSH, old)
     return False
 
 
@@ -168,11 +156,6 @@ def alarmClock():
     alarmTime = subprocess.getoutput("termux-dialog time -t 'Alarm'")
     alarmTime = json.loads(alarmTime)["text"]
     showAlarmTime = False
-    fd = sys.stdin.fileno()
-    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    old = tty.tcgetattr(fd)
-    tty.setcbreak(fd)
     while 1:
         time.sleep(0.1)
         if showAlarmTime:
@@ -182,7 +165,6 @@ def alarmClock():
                 datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
         if datetime.now().strftime("%H:%M") == alarmTime:
-            tty.tcsetattr(fd, tty.TCSAFLUSH, old)
             snooze = alarm(True, True)
             if snooze:
                 alarmTime = addFiveMinutes(alarmTime)
@@ -190,28 +172,26 @@ def alarmClock():
                 break
         keyInput = sys.stdin.read(1)
         if keyInput == "q":
-            tty.tcsetattr(fd, tty.TCSAFLUSH, old)
             break
         if keyInput == "s":
             showAlarmTime = not showAlarmTime
 
 
 def clock():
-    fd = sys.stdin.fileno()
-    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    old = tty.tcgetattr(fd)
-    tty.setcbreak(fd)
     while 1:
         time.sleep(0.1)
         sys.stdout.write(displayText(
             datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
         if sys.stdin.read(1) == "q":
-            tty.tcsetattr(fd, tty.TCSAFLUSH, old)
             break
 
 
+fd = sys.stdin.fileno()
+fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+old = tty.tcgetattr(fd)
+tty.setcbreak(fd)
 linesProcess = subprocess.Popen(
     "tput lines", stdout=subprocess.PIPE, shell=True)
 lastLines = int(linesProcess.stdout.read()[:-1])
@@ -225,3 +205,4 @@ if option == "Alarm":
 if option == "Clock":
     clock()
 sys.stdout.write("\033[?47l\u001b[0J")
+tty.tcsetattr(fd, tty.TCSAFLUSH, old)
