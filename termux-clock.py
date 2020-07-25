@@ -14,6 +14,11 @@ def playbeep():
                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
 
+def playbeepWithOutPause():
+    subprocess.Popen("termux-media-player play /data/data/com.termux/files/home/termux-clock/sounds/beep-09.mp3",
+                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, shell=True)
+
+
 def displayText(text, color):
     linesProcess = subprocess.Popen(
         "tput lines", stdout=subprocess.PIPE, shell=True)
@@ -193,26 +198,33 @@ def intervalTimer():
         rest = timeToSeconds(rest, True)
         endTime = round(time.time()) + work
         currentAction = "work"
+        beepsDone = [False, False, False]
     while 1:
         timeLeft = endTime-round(time.time())
         if currentAction == "work":
             color = "red"
         elif currentAction == "rest":
             color = "green"
+        if timeLeft <= 3 and not beepsDone[timeLeft]:
+            playbeepWithOutPause()
+            beepsDone[timeLeft] = True
         sys.stdout.write(
             "\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color))
         sys.stdout.flush()
         if timeLeft <= 0:
-            playbeep()
+            for i in range(3):
+                beepsDone[i] = False
             if currentAction == "rest":
                 intervals -= 1
                 if intervals == 0:
                     break
                 endTime = round(time.time()) + work
                 currentAction = "work"
+                subprocess.Popen("termux-tts-speak 'rest'", shell=True)
             elif currentAction == "work":
                 endTime = round(time.time()) + rest
                 currentAction = "rest"
+                subprocess.Popen("termux-tts-speak 'work'", shell=True)
         if sys.stdin.read(1) == "q":
             break
 
