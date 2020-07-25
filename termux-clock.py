@@ -220,11 +220,11 @@ def intervalTimer():
                     break
                 endTime = round(time.time()) + work
                 currentAction = "work"
-                subprocess.Popen("termux-tts-speak 'rest'", shell=True)
+                subprocess.Popen("termux-tts-speak 'work'", shell=True)
             elif currentAction == "work":
                 endTime = round(time.time()) + rest
                 currentAction = "rest"
-                subprocess.Popen("termux-tts-speak 'work'", shell=True)
+                subprocess.Popen("termux-tts-speak 'rest'", shell=True)
         if sys.stdin.read(1) == "q":
             break
 
