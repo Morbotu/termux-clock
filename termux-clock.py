@@ -14,20 +14,24 @@ def playbeep():
                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
 
-lastLines = 0
+lastLines = []
 
 
 def displayText(text, color):
     global lastLines
-    goBackLines = lastLines
     linesProcess = subprocess.Popen(
         "tput lines", stdout=subprocess.PIPE, shell=True)
     lines = int(linesProcess.stdout.read()[:-1])
     columnsProcess = subprocess.Popen(
         "tput cols", stdout=subprocess.PIPE, shell=True)
     columns = int(columnsProcess.stdout.read()[:-1])
+    if lines > max(lastLines):
+        goBackLines = lastLines[-1]
+        lastLines.append(lines)
+    else:
+        lastLines.append(lastLines.pop(lastLines.index(lines)))
+        goBackLines = lines
 
-    lastLines = lines
     text = text2art(text).split("\n")
     del text[-1]
 
@@ -194,7 +198,7 @@ old = tty.tcgetattr(fd)
 tty.setcbreak(fd)
 linesProcess = subprocess.Popen(
     "tput lines", stdout=subprocess.PIPE, shell=True)
-lastLines = int(linesProcess.stdout.read()[:-1])
+lastLines.append(int(linesProcess.stdout.read()[:-1]))
 sys.stdout.write("\033[?47h\u001b[0m")
 option = subprocess.getoutput("termux-dialog radio -v 'Timer,Alarm,Clock'")
 option = json.loads(option)["text"]
