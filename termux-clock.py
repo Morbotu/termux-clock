@@ -62,11 +62,11 @@ def timeToSeconds(normalTime):
 
 
 def timer():
-    timerTime = subprocess.getoutput(
-        "termux-dialog -t 'Select time' -i 'Format like h:m:s'")
-    timerTime = timeToSeconds(json.loads(timerTime)["text"])
+    timerTime = json.loads(subprocess.getoutput(
+        "termux-dialog -t 'Select time' -i 'Format like h:m:s'"))["text"]
     if len([i for i in timerTime.split(":") if type(i) == int]) != 3:
         return
+    timerTime = timeToSeconds(timerTime)
     endTime = round(time.time()) + timerTime
     quit = False
     while 1:
