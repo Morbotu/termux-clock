@@ -152,7 +152,6 @@ def alarmClock():
         "termux-dialog time -t 'Alarm'"))["text"]
     showAlarmTime = False
     while 1:
-        time.sleep(0.1)
         if showAlarmTime:
             sys.stdout.write(displayText(alarmTime, "black"))
         else:
