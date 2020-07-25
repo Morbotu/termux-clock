@@ -200,6 +200,7 @@ def intervalTimer():
             "\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color))
         sys.stdout.flush()
         if endTime-round(time.time()) <= 0:
+            playbeep()
             if currentAction == "rest":
                 intervals -= 1
                 if intervals == 0:
@@ -226,12 +227,14 @@ old = tty.tcgetattr(fd)
 tty.setcbreak(fd)
 sys.stdout.write("\033[?25l\033[?47h\u001b[0m")
 option = json.loads(subprocess.getoutput(
-    "termux-dialog radio -v 'Timer,Alarm,Clock'"))["text"]
+    "termux-dialog radio -v 'Timer,Alarm,Clock,Interval'"))["text"]
 if option == "Timer":
     timer()
 if option == "Alarm":
     alarmClock()
 if option == "Clock":
     clock()
+if option == "Interval":
+    intervalTimer()
 sys.stdout.write("\033[?47l\u001b[0J\033[?25h")
 tty.tcsetattr(fd, tty.TCSAFLUSH, old)
