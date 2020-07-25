@@ -212,7 +212,7 @@ fl = fcntl.fcntl(fd, fcntl.F_GETFL)
 fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 old = tty.tcgetattr(fd)
 tty.setcbreak(fd)
-sys.stdout.write("\033[?47h\u001b[0m")
+sys.stdout.write("\033[?25l\033[?47h\u001b[0m")
 option = json.loads(subprocess.getoutput(
     "termux-dialog radio -v 'Timer,Alarm,Clock'"))["text"]
 if option == "Timer":
@@ -221,5 +221,5 @@ if option == "Alarm":
     alarmClock()
 if option == "Clock":
     clock()
-sys.stdout.write("\033[?47l\u001b[0J")
+sys.stdout.write("\033[?47l\u001b[0J\033[?25h")
 tty.tcsetattr(fd, tty.TCSAFLUSH, old)
