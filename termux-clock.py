@@ -65,6 +65,8 @@ def timer():
     timerTime = subprocess.getoutput(
         "termux-dialog -t 'Select time' -i 'Format like h:m:s'")
     timerTime = timeToSeconds(json.loads(timerTime)["text"])
+    if len([i for i in timerTime.split(":") if type(i) == int]) != 3:
+        return
     endTime = round(time.time()) + timerTime
     quit = False
     while 1:
@@ -169,6 +171,10 @@ def alarmClock():
             break
         if keyInput == "s":
             showAlarmTime = not showAlarmTime
+
+
+def intervalTimer():
+    pass
 
 
 def clock():
