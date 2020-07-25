@@ -56,7 +56,10 @@ def timeToSeconds(normalTime, noHours=False):
     normalTime = normalTime.split(":")
     timeInMillis = 0
     if not noHours:
-        timeInMillis += int(normalTime[0]) * 3600
+        timeInMillis += int(normalTime[0]) * 60
+        timeInMillis += int(normalTime[1])
+        return timeInMillis
+    timeInMillis += int(normalTime[0]) * 3600
     timeInMillis += int(normalTime[1]) * 60
     timeInMillis += int(normalTime[2])
     return timeInMillis
