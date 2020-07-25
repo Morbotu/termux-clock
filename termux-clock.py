@@ -55,7 +55,7 @@ def displayText(text, color):
 def timeToSeconds(normalTime, noHours=False):
     normalTime = normalTime.split(":")
     timeInMillis = 0
-    if not noHours:
+    if noHours:
         timeInMillis += int(normalTime[0]) * 60
         timeInMillis += int(normalTime[1])
         return timeInMillis
