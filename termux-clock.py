@@ -15,7 +15,7 @@ def playbeep():
 
 
 def playbeepWithOutPause():
-    subprocess.Popen("termux-media-player play /data/data/com.termux/files/home/termux-clock/sounds/beep-09.mp3",
+    subprocess.Popen("termux-media-player stop && termux-media-player play /data/data/com.termux/files/home/termux-clock/sounds/beep-06.mp3",
                      stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, shell=True)
 
 
