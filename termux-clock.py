@@ -185,7 +185,7 @@ def intervalTimer():
         if len([i for i in rest.split(":") if i.isdigit()]) != 2:
             return
         intervals = json.loads(subprocess.getoutput(
-            "termux-dialog -r '1, 100, 2' -t 'Intervals'"))["text"]
+            "termux-dialog counter -r '1, 100, 2' -t 'Intervals'"))["text"]
         work = timeToSeconds(work, True)
         rest = timeToSeconds(work, True)
         endTime = round(time.time()) + work
