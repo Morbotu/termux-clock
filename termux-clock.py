@@ -190,7 +190,7 @@ def intervalTimer():
         intervals = int(json.loads(subprocess.getoutput(
             "termux-dialog counter -r '1,100,2' -t 'Intervals'"))["text"])
         work = timeToSeconds(work, True)
-        rest = timeToSeconds(work, True)
+        rest = timeToSeconds(rest, True)
         endTime = round(time.time()) + work
         currentAction = "work"
     while 1:
