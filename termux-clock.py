@@ -208,8 +208,11 @@ def intervalTimer():
                 intervals -= 1
                 if intervals == 0:
                     break
-            endTime = round(time.time()) + rest
-            currentAction = "rest"
+                endTime = round(time.time()) + work
+                currentAction = "work"
+            elif currentAction == "work":
+                endTime = round(time.time()) + rest
+                currentAction = "rest"
         if sys.stdin.read(1) == "q":
             break
 
