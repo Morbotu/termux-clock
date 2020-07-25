@@ -25,7 +25,7 @@ def displayText(text, color):
     columnsProcess = subprocess.Popen(
         "tput cols", stdout=subprocess.PIPE, shell=True)
     columns = int(columnsProcess.stdout.read()[:-1])
-    if lines > max(lastLines):
+    if lines >= max(lastLines):
         goBackLines = lastLines[-1]
         lastLines.append(lines)
     else:
