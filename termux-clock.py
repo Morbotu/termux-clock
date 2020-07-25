@@ -70,7 +70,6 @@ def timer():
     endTime = round(time.time()) + timerTime
     quit = False
     while 1:
-        time.sleep(0.1)
         timeLeft = endTime-round(time.time())
         if timeLeft > 5:
             color = "green"
@@ -181,7 +180,6 @@ def intervalTimer():
     quit = False
     endTime = 0
     while 1:
-        time.sleep(0.1)
         timeLeft = endTime-round(time.time())
         if timeLeft > 5:
             color = "green"
@@ -203,7 +201,6 @@ def intervalTimer():
 
 def clock():
     while 1:
-        time.sleep(0.1)
         sys.stdout.write(displayText(
             datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
