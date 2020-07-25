@@ -205,9 +205,9 @@ def intervalTimer():
             color = "red"
         elif currentAction == "rest":
             color = "green"
-        if timeLeft <= 3 and not beepsDone[timeLeft]:
+        if timeLeft <= 3 and not beepsDone[timeLeft-1]:
             playbeepWithOutPause()
-            beepsDone[timeLeft] = True
+            beepsDone[timeLeft-1] = True
         sys.stdout.write(
             "\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color))
         sys.stdout.flush()
