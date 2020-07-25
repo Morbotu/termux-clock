@@ -49,13 +49,13 @@ def displayText(text, color):
 
     output = "\n".join(output)
     if color == "green":
-        return "\u001b[" + str(goBackLines) + "F\u001b[42;1m" + output + "\u001b[0m"
+        return "\u001b[100F\u001b[42;1m" + output + "\u001b[0m"
     if color == "red":
-        return "\u001b[" + str(goBackLines) + "F\u001b[41;1m" + output + "\u001b[0m"
+        return "\u001b[100F\u001b[41;1m" + output + "\u001b[0m"
     if color == "yellow":
-        return "\u001b[" + str(goBackLines) + "F\u001b[43;1m" + output + "\u001b[0m"
+        return "\u001b[100F\u001b[43;1m" + output + "\u001b[0m"
     if color == "black":
-        return "\u001b[" + str(goBackLines) + "F\u001b[40;1m" + output + "\u001b[0m"
+        return "\u001b[100F\u001b[40;1m" + output + "\u001b[0m"
 
 
 def timeToSeconds(normalTime):
