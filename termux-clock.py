@@ -216,7 +216,6 @@ linesProcess = subprocess.Popen(
     "tput lines", stdout=subprocess.PIPE, shell=True)
 lastLines = int(linesProcess.stdout.read()[:-1])
 sys.stdout.write("\033[?47h\u001b[0m")
-sys.stdout.write("\u001b[100F\u001b[s")
 option = subprocess.getoutput("termux-dialog radio -v 'Timer,Alarm,Clock'")
 option = json.loads(option)["text"]
 if option == "Timer":
