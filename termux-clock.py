@@ -194,12 +194,12 @@ def intervalTimer():
                 "termux-dialog -t 'Work' -i 'Format like m:s'"))["text"])
             if len([i for i in work[i].split(":") if i.isdigit()]) != 2:
                 return
-            work[i] = timeToSeconds(work[i])
+            work[i] = timeToSeconds(work[i], True)
             rest.append(json.loads(subprocess.getoutput(
                 "termux-dialog -t 'Rest' -i 'Format like m:s'"))["text"])
             if len([i for i in rest[i].split(":") if i.isdigit()]) != 2:
                 return
-            rest[i] = timeToSeconds(rest[i])
+            rest[i] = timeToSeconds(rest[i], True)
         endTime = round(time.time()) + work[i]
 
     currentAction = "work"
