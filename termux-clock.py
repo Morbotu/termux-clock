@@ -145,32 +145,21 @@ def alarm(showTime=False, enableSnooze=False):
     return False
 
 
-def addFiveMinutes(alarmTime):
-    alarmTime = alarmTime.split(":")
-    alarmTime[1] = str(int(alarmTime[1]) + 5)
-    if int(alarmTime[1]) >= 60:
-        alarmTime[1] = str(int(alarmTime[1]) % 60)
-        alarmTime[0] = str(int(alarmTime[0]) + 1)
-        if int(alarmTime[0]) >= 24:
-            alarmTime[0] = str(int(alarmTime[0]) % 24)
-    return ":".join(alarmTime)
-
-
 def alarmClock():
-    alarmTime = json.loads(subprocess.getoutput(
-        "termux-dialog time -t 'Alarm'"))["text"]
+    alarmTime = datetime.strptime(json.loads(subprocess.getoutput(
+        "termux-dialog time -t 'Alarm'"))["text"], "%H:%M")
     showAlarmTime = False
     while 1:
         if showAlarmTime:
-            sys.stdout.write(displayText(alarmTime, "black"))
+            sys.stdout.write(displayText(alarmTime.strftime("%H:%M"), "black"))
         else:
             sys.stdout.write(displayText(
                 datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
-        if datetime.now().strftime("%H:%M") == alarmTime:
+        if datetime.now().strftime("%H:%M") == alarmTime.strftime("%H:%M"):
             snooze = alarm(True, True)
             if snooze:
-                alarmTime = addFiveMinutes(alarmTime)
+                alarmTime += timedelta(minutes=5)
             else:
                 break
         keyInput = sys.stdin.read(1)
