@@ -230,9 +230,6 @@ def intervalTimer():
                 currentAction = "work"
                 subprocess.Popen("termux-tts-speak 'work'", shell=True)
             elif currentAction == "work":
-                intervals -= 1
-                if intervals == 0:
-                    break
                 if intervalOption == "Interval repeat":
                     endTime = round(time.time()) + rest
                 if intervalOption == "Interval variable":
