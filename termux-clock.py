@@ -91,9 +91,15 @@ def timer():
         sys.stdout.flush()
         if color == "red":
             break
-        if sys.stdin.read(1) == "q":
+        keyInput = sys.stdin.read(1)
+        if keyInput == "q":
             quit = True
             break
+        if keyInput == "p":
+            while 1:
+                if sys.stdout.read(1) == "p":
+                    break
+            endTime = round(time.time()) + timeLeft
     if not quit:
         alarm()
 
