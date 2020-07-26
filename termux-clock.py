@@ -200,7 +200,7 @@ def intervalTimer():
             if len([i for i in rest[i].split(":") if i.isdigit()]) != 2:
                 return
             rest[i] = timeToSeconds(rest[i], True)
-        endTime = round(time.time()) + work[i]
+        endTime = round(time.time()) + work[0]
 
     currentAction = "work"
     beepsDone = [False, False, False]
