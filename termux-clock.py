@@ -172,6 +172,8 @@ def alarmClock():
 def intervalTimer():
     intervalOption = json.loads(subprocess.getoutput(
         "termux-dialog radio -v 'Interval repeat,Interval variable'"))["text"]
+    intervals = int(json.loads(subprocess.getoutput(
+        "termux-dialog counter -r '1,100,2' -t 'Intervals'"))["text"])
     if intervalOption == "Interval repeat":
         work = json.loads(subprocess.getoutput(
             "termux-dialog -t 'Work' -i 'Format like m:s'"))["text"]
@@ -181,13 +183,27 @@ def intervalTimer():
             "termux-dialog -t 'Rest' -i 'Format like m:s'"))["text"]
         if len([i for i in rest.split(":") if i.isdigit()]) != 2:
             return
-        intervals = int(json.loads(subprocess.getoutput(
-            "termux-dialog counter -r '1,100,2' -t 'Intervals'"))["text"])
         work = timeToSeconds(work, True)
         rest = timeToSeconds(rest, True)
         endTime = round(time.time()) + work
-        currentAction = "work"
-        beepsDone = [False, False, False]
+    if intervalOption == "Interval variable":
+        work = []
+        rest = []
+        for i in range(intervals):
+            work.append(json.loads(subprocess.getoutput(
+                "termux-dialog -t 'Work' -i 'Format like m:s'"))["text"])
+            if len([i for i in work[i].split(":") if i.isdigit()]) != 2:
+                return
+            work[i] = timeToSeconds(work[i])
+            rest.append(json.loads(subprocess.getoutput(
+                "termux-dialog -t 'Rest' -i 'Format like m:s'"))["text"])
+            if len([i for i in rest[i].split(":") if i.isdigit()]) != 2:
+                return
+            rest[i] = timeToSeconds(rest[i])
+        endTime = round(time.time()) + work[i]
+
+    currentAction = "work"
+    beepsDone = [False, False, False]
     while 1:
         timeLeft = endTime-round(time.time())
         if currentAction == "work":
@@ -207,11 +223,17 @@ def intervalTimer():
                 intervals -= 1
                 if intervals == 0:
                     break
-                endTime = round(time.time()) + work
+                if intervalOption == "Interval repeat":
+                    endTime = round(time.time()) + work
+                if intervalOption == "Interval variable":
+                    endTime = work[-intervals]
                 currentAction = "work"
                 subprocess.Popen("termux-tts-speak 'work'", shell=True)
             elif currentAction == "work":
-                endTime = round(time.time()) + rest
+                if intervalOption == "Interval repeat":
+                    endTime = round(time.time()) + rest
+                if intervalOption == "Interval variable":
+                    endTime = rest[-intervals]
                 currentAction = "rest"
                 subprocess.Popen("termux-tts-speak 'rest'", shell=True)
         if sys.stdin.read(1) == "q":
