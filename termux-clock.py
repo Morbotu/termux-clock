@@ -214,7 +214,7 @@ def intervalTimer():
             playbeepWithOutPause()
             beepsDone[timeLeft-1] = True
         sys.stdout.write(
-            "\u001b[1000D" + displayText((datetime.strptime("0:0", "%M:%S") + timedelta(seconds=timeLeft)).strftime("%M:%S")), color)
+            "\u001b[1000D" + displayText((datetime.strptime("0:0", "%M:%S") + timedelta(seconds=timeLeft)).strftime("%M:%S"), color))
         sys.stdout.flush()
         if timeLeft <= 0:
             for i in range(3):
