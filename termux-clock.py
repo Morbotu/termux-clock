@@ -226,14 +226,14 @@ def intervalTimer():
                 if intervalOption == "Interval repeat":
                     endTime = round(time.time()) + work
                 if intervalOption == "Interval variable":
-                    endTime = work[-intervals]
+                    endTime = round(time.time()) + work[-intervals]
                 currentAction = "work"
                 subprocess.Popen("termux-tts-speak 'work'", shell=True)
             elif currentAction == "work":
                 if intervalOption == "Interval repeat":
                     endTime = round(time.time()) + rest
                 if intervalOption == "Interval variable":
-                    endTime = rest[-intervals]
+                    endTime = round(time.time()) + rest[-intervals]
                 currentAction = "rest"
                 subprocess.Popen("termux-tts-speak 'rest'", shell=True)
         if sys.stdin.read(1) == "q":
