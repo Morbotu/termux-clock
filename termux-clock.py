@@ -97,8 +97,14 @@ def timer():
             break
         if keyInput == "p":
             while 1:
-                if sys.stdin.read(1) == "p":
+                keyInput = sys.stdin.read(1)
+                if keyInput == "p":
                     break
+                if keyInput == "q":
+                    quit = True
+                    break
+            if quit:
+                break
             endTime = round(time.time()) + timeLeft
     if not quit:
         alarm()
@@ -210,6 +216,7 @@ def intervalTimer():
 
     currentAction = "work"
     beepsDone = [False, False, False]
+    quit = False
     while 1:
         timeLeft = endTime-round(time.time())
         if currentAction == "work":
@@ -242,8 +249,20 @@ def intervalTimer():
                     endTime = round(time.time()) + rest[-intervals]
                 currentAction = "rest"
                 subprocess.Popen("termux-tts-speak 'rest'", shell=True)
-        if sys.stdin.read(1) == "q":
+        keyInput = sys.stdin.read(1)
+        if keyInput == "q":
             break
+        if keyInput == "p":
+            while 1:
+                keyInput = sys.stdin.read(1)
+                if keyInput == "p":
+                    break
+                if keyInput == "q":
+                    quit = True
+                    break
+            if quit:
+                break
+            endTime = round(time.time()) + timeLeft
 
 
 def clock():
