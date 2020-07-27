@@ -197,7 +197,6 @@ def intervalTimer():
             return
         work = timeToSeconds(work, True)
         rest = timeToSeconds(rest, True)
-        endTime = round(time.time()) + work
     if intervalOption == "Interval variable":
         work = []
         rest = []
@@ -212,16 +211,18 @@ def intervalTimer():
             if len([i for i in rest[i].split(":") if i.isdigit()]) != 2:
                 return
             rest[i] = timeToSeconds(rest[i], True)
-        endTime = round(time.time()) + work[0]
 
-    currentAction = "work"
+    
+    subprocess.Popen("termux-tts-speak 'warmup'", shell=True)
+    currentAction = "warmup"
     beepsDone = [False, False, False]
+    endTime = round(time.time()) + 10
     quit = False
     while 1:
         timeLeft = endTime-round(time.time())
         if currentAction == "work":
             color = "red"
-        elif currentAction == "rest":
+        elif currentAction == "rest" or currentAction == "warmup":
             color = "green"
         if timeLeft <= 3 and not beepsDone[timeLeft-1]:
             playbeepWithOutPause()
@@ -232,7 +233,14 @@ def intervalTimer():
         if timeLeft <= 0:
             for i in range(3):
                 beepsDone[i] = False
-            if currentAction == "rest":
+            if currentAction == "warmup":
+                if intervalOption == "Interval repeat":
+                    endTime = round(time.time()) + work
+                if intervalOption == "Interval variable":
+                    endTime = round(time.time()) + work[0]
+                currentAction = "work"
+                subprocess.Popen("termux-tts-speak 'work'", shell=True)
+            elif currentAction == "rest":
                 intervals -= 1
                 if intervals == 0:
                     break
@@ -251,6 +259,7 @@ def intervalTimer():
                 subprocess.Popen("termux-tts-speak 'rest'", shell=True)
         keyInput = sys.stdin.read(1)
         if keyInput == "q":
+            quit = True
             break
         if keyInput == "p":
             while 1:
@@ -263,6 +272,8 @@ def intervalTimer():
             if quit:
                 break
             endTime = round(time.time()) + timeLeft
+    if not quit:
+        subprocess.call("termux-tts-speak 'done'", shell=True)
 
 
 def clock():
