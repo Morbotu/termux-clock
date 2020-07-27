@@ -26,10 +26,8 @@ def displayText(text, color):
     columnsProcess = subprocess.Popen(
         "tput cols", stdout=subprocess.PIPE, shell=True)
     columns = int(columnsProcess.stdout.read()[:-1])
-
     text = text2art(text).split("\n")
     del text[-1]
-
     output = []
     spaceAboveTime = int(lines/2) - int(len(text)/2)
     spaceUnderTime = spaceAboveTime
@@ -37,15 +35,12 @@ def displayText(text, color):
         spaceUnderTime += 1
     for i in range(spaceAboveTime):
         output.append(" " * columns)
-
     for i in text:
         spaceLeft = " " * (int(columns/2) - int(len(i)/2))
         spaceRight = " " * (columns - len(i) - len(spaceLeft) + 1)
         output.append(spaceLeft + i[:-1] + spaceRight)
-
     for i in range(spaceUnderTime):
         output.append(" " * columns)
-
     output = "\n".join(output)
     if color == "green":
         return "\u001b[100F\u001b[42;1m" + output + "\u001b[0m"
@@ -78,7 +73,7 @@ def timer():
     timerTime = timeToSeconds(timerTime)
     endTime = round(time.time()) + timerTime
     quit = False
-    while 1:
+    while True:
         timeLeft = endTime-round(time.time())
         if timeLeft > 5:
             color = "green"
@@ -119,8 +114,7 @@ def alarm(showTime=False, enableSnooze=False):
     if enableSnooze:
         notification += " --button2 'Snooze alarm' --button2-action 'echo \"Alarm snoozed\" > /data/data/com.termux/files/home/termux-clock/alarmOutput.txt'"
     subprocess.call(notification, shell=True)
-
-    while 1:
+    while True:
         playbeep()
         if showTime:
             sys.stdout.write(
@@ -160,8 +154,10 @@ def alarm(showTime=False, enableSnooze=False):
 def alarmClock():
     alarmTime = datetime.strptime(json.loads(subprocess.getoutput(
         "termux-dialog time -t 'Alarm'"))["text"], "%H:%M")
+    openSuperop = json.loads(subprocess.getoutput(
+        "termux-dialog confirm -t 'Open superop' -i ''"))["text"]
     showAlarmTime = False
-    while 1:
+    while True:
         if showAlarmTime:
             sys.stdout.write(displayText(alarmTime.strftime("%H:%M"), "black"))
         else:
@@ -179,6 +175,8 @@ def alarmClock():
             break
         if keyInput == "s":
             showAlarmTime = not showAlarmTime
+    if openSuperop == "yes":
+        subprocess.call("termux-open-url http://app.super-op.com/", shell=True)
 
 
 def intervalTimer():
@@ -213,16 +211,16 @@ def intervalTimer():
             rest[i] = timeToSeconds(rest[i], True)
 
     
-    subprocess.Popen("termux-tts-speak 'warmup'", shell=True)
-    currentAction = "warmup"
+    subprocess.Popen("termux-tts-speak 'prepare'", shell=True)
+    currentAction = "prepare"
     beepsDone = [False, False, False]
     endTime = round(time.time()) + 10
     quit = False
-    while 1:
+    while True:
         timeLeft = endTime-round(time.time())
         if currentAction == "work":
             color = "red"
-        elif currentAction == "rest" or currentAction == "warmup":
+        elif currentAction == "rest" or currentAction == "prepare":
             color = "green"
         if timeLeft <= 3 and not beepsDone[timeLeft-1]:
             playbeepWithOutPause()
@@ -233,7 +231,7 @@ def intervalTimer():
         if timeLeft <= 0:
             for i in range(3):
                 beepsDone[i] = False
-            if currentAction == "warmup":
+            if currentAction == "prepare":
                 if intervalOption == "Interval repeat":
                     endTime = round(time.time()) + work
                 if intervalOption == "Interval variable":
@@ -277,7 +275,7 @@ def intervalTimer():
 
 
 def clock():
-    while 1:
+    while True:
         sys.stdout.write(displayText(
             datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
