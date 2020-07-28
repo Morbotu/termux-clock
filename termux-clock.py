@@ -51,13 +51,13 @@ def displayText(text, color):
     # color in the if statement changes the color of the
     # output.
     if color == "green":
-        return "\u001b[0;0H\u001b[42;1m" + output
+        return "\u001b[0;0H\u001b[42;1m" + output + "\001b[0m"
     if color == "red":
-        return "\u001b[0;0H\u001b[41;1m" + output
+        return "\u001b[0;0H\u001b[41;1m" + output + "\001b[0m"
     if color == "yellow":
-        return "\u001b[0;0H\u001b[43;1m" + output
+        return "\u001b[0;0H\u001b[43;1m" + output + "\001b[0m"
     if color == "black":
-        return "\u001b[0;0H\u001b[40;1m" + output
+        return "\u001b[0;0H\u001b[40;1m" + output + "\001b[0m"
 
 
 def timeToSeconds(normalTime, noHours=False):
@@ -330,7 +330,8 @@ tty.setcbreak(fd)
 
 # \033[?25l makes curser invisible.
 # \033[?47 saves current window.
-sys.stdout.write("\033[?25l\033[?47h")
+# \001b[0m resets all colors.
+sys.stdout.write("\033[?25l\033[?47h\001b[0m")
 
 option = json.loads(subprocess.getoutput(
     "termux-dialog radio -v 'Timer,Alarm,Clock,Interval'"))["text"]
