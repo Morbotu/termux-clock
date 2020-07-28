@@ -178,7 +178,7 @@ def alarmClock():
         if keyInput == "s":
             showAlarmTime = not showAlarmTime
     if openSuperop == "yes":
-        subprocess.call("termux-open-url http://app.super-op.com/", shell=True)
+        subprocess.call("bash -c '. ~/storage/shared/termuxlauncher/.apps-launcher; launch superop'", shell=True)
 
 
 def intervalTimer():
