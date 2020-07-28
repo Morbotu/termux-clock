@@ -46,14 +46,18 @@ def displayText(text, color):
         output.append(" " * columns)
     output = "\n".join(output)
 
+    # \u001b[0;0H moves the cursor to location 0,0.
+    # The \u001b[{n};1m with n a number representing a
+    # color in the if statement changes the color of the
+    # output.
     if color == "green":
-        return "\u001b[100F\u001b[42;1m" + output + "\u001b[0m"
+        return "\u001b[0;0H\u001b[42;1m" + output
     if color == "red":
-        return "\u001b[100F\u001b[41;1m" + output + "\u001b[0m"
+        return "\u001b[0;0H\u001b[41;1m" + output
     if color == "yellow":
-        return "\u001b[100F\u001b[43;1m" + output + "\u001b[0m"
+        return "\u001b[0;0H\u001b[43;1m" + output
     if color == "black":
-        return "\u001b[100F\u001b[40;1m" + output + "\u001b[0m"
+        return "\u001b[0;0H\u001b[40;1m" + output
 
 
 def timeToSeconds(normalTime, noHours=False):
@@ -326,8 +330,7 @@ tty.setcbreak(fd)
 
 # \033[?25l makes curser invisible.
 # \033[?47 saves current window.
-# \u001b[0m reset colors.
-sys.stdout.write("\033[?25l\033[?47h\u001b[0m")
+sys.stdout.write("\033[?25l\033[?47h")
 
 option = json.loads(subprocess.getoutput(
     "termux-dialog radio -v 'Timer,Alarm,Clock,Interval'"))["text"]
@@ -341,7 +344,6 @@ if option == "Interval":
     intervalTimer()
 
 # \033[?47l loads window saved in the beginning.
-# \u001b[0J clears the screen.
 # \033[?25h makes curser visible.
 sys.stdout.write("\033[?47l\033[?25h")
 
