@@ -20,19 +20,22 @@ def playbeepWithOutPause():
 
 
 def displayText(text, color):
-    linesProcess = subprocess.Popen(
+    getLines = subprocess.Popen(
         "tput lines", stdout=subprocess.PIPE, shell=True)
-    lines = int(linesProcess.stdout.read()[:-1])
-    columnsProcess = subprocess.Popen(
+    lines = int(getLines.stdout.read()[:-1])
+    getColumns = subprocess.Popen(
         "tput cols", stdout=subprocess.PIPE, shell=True)
-    columns = int(columnsProcess.stdout.read()[:-1])
+    columns = int(getColumns.stdout.read()[:-1])
+
     text = text2art(text).split("\n")
     del text[-1]
-    output = []
+
     spaceAboveTime = int(lines/2) - int(len(text)/2)
     spaceUnderTime = spaceAboveTime
     if lines % 2 != 0:
         spaceUnderTime += 1
+
+    output = []
     for i in range(spaceAboveTime):
         output.append(" " * columns)
     for i in text:
@@ -42,6 +45,7 @@ def displayText(text, color):
     for i in range(spaceUnderTime):
         output.append(" " * columns)
     output = "\n".join(output)
+
     if color == "green":
         return "\u001b[100F\u001b[42;1m" + output + "\u001b[0m"
     if color == "red":
@@ -54,6 +58,7 @@ def displayText(text, color):
 
 def timeToSeconds(normalTime, noHours=False):
     normalTime = normalTime.split(":")
+
     timeInMillis = 0
     if noHours:
         timeInMillis += int(normalTime[0]) * 60
@@ -71,21 +76,26 @@ def timer():
     if len([i for i in timerTime.split(":") if i.isdigit()]) != 3:
         return
     timerTime = timeToSeconds(timerTime)
+
     endTime = round(time.time()) + timerTime
     quit = False
     while True:
         timeLeft = endTime-round(time.time())
+
         if timeLeft > 5:
             color = "green"
         elif timeLeft <= 0:
             color = "red"
         else:
             color = "yellow"
+
         sys.stdout.write(
             "\u001b[1000D" + displayText(str(timedelta(seconds=timeLeft)), color))
         sys.stdout.flush()
+
         if color == "red":
             break
+
         keyInput = sys.stdin.read(1)
         if keyInput == "q":
             quit = True
@@ -108,11 +118,15 @@ def timer():
 def alarm(showTime=False, enableSnooze=False):
     turnOff = subprocess.Popen(
         "termux-dialog confirm -t 'Turn off' -i ''", stdout=subprocess.PIPE, shell=True)
+
     notification = "termux-notification -t 'Alarm' " + \
         "--button1 'Stop alarm' --button1-action 'echo \"Alarm closed\" > /data/data/com.termux/files/home/termux-clock/alarmOutput.txt' " + \
         "--on-delete 'echo \"Alarm closed\" > /data/data/com.termux/files/home/termux-clock/alarmOutput.txt' " + "-i 1204"
+
     if enableSnooze:
-        notification += " --button2 'Snooze alarm' --button2-action 'echo \"Alarm snoozed\" > /data/data/com.termux/files/home/termux-clock/alarmOutput.txt'"
+        notification += " --button2 'Snooze alarm'" + \
+            "--button2-action 'echo \"Alarm snoozed\" > /data/data/com.termux/files/home/termux-clock/alarmOutput.txt'"
+
     subprocess.call(notification, shell=True)
     while True:
         playbeep()
@@ -120,6 +134,7 @@ def alarm(showTime=False, enableSnooze=False):
             sys.stdout.write(
                 displayText(datetime.now().strftime("%H:%M:%S"), "black"))
             sys.stdout.flush()
+
         turnOff.poll()
         if turnOff.returncode != None:
             if json.loads(turnOff.stdout.read())["text"] == "yes":
@@ -131,8 +146,9 @@ def alarm(showTime=False, enableSnooze=False):
 
         if sys.stdin.read(1) == "q":
             subprocess.call(
-                    "termux-notification-remove 1204", shell=True)
+                "termux-notification-remove 1204", shell=True)
             break
+
         try:
             with open("/data/data/com.termux/files/home/termux-clock/alarmOutput.txt", "r") as f:
                 output = f.read()
@@ -156,8 +172,10 @@ def alarm(showTime=False, enableSnooze=False):
 def alarmClock():
     alarmTime = datetime.strptime(json.loads(subprocess.getoutput(
         "termux-dialog time -t 'Alarm'"))["text"], "%H:%M")
+
     openSuperop = json.loads(subprocess.getoutput(
         "termux-dialog confirm -t 'Open superop' -i ''"))["text"]
+
     showAlarmTime = False
     while True:
         if showAlarmTime:
@@ -166,26 +184,32 @@ def alarmClock():
             sys.stdout.write(displayText(
                 datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
+
         if datetime.now().strftime("%H:%M") == alarmTime.strftime("%H:%M"):
             snooze = alarm(True, True)
             if snooze:
                 alarmTime += timedelta(minutes=5)
             else:
                 break
+
         keyInput = sys.stdin.read(1)
         if keyInput == "q":
             break
         if keyInput == "s":
             showAlarmTime = not showAlarmTime
+
     if openSuperop == "yes":
-        subprocess.call("bash -c '. ~/storage/shared/termuxlauncher/.apps-launcher; launch superop'", shell=True)
+        subprocess.call(
+            "bash -c '. ~/storage/shared/termuxlauncher/.apps-launcher; launch superop'", shell=True)
 
 
 def intervalTimer():
     intervalOption = json.loads(subprocess.getoutput(
         "termux-dialog radio -v 'Interval repeat,Interval variable'"))["text"]
+
     intervals = int(json.loads(subprocess.getoutput(
         "termux-dialog counter -r '1,100,2' -t 'Intervals'"))["text"])
+
     if intervalOption == "Interval repeat":
         work = json.loads(subprocess.getoutput(
             "termux-dialog -t 'Work' -i 'Format like m:s'"))["text"]
@@ -197,6 +221,7 @@ def intervalTimer():
             return
         work = timeToSeconds(work, True)
         rest = timeToSeconds(rest, True)
+
     if intervalOption == "Interval variable":
         work = []
         rest = []
@@ -212,7 +237,6 @@ def intervalTimer():
                 return
             rest[i] = timeToSeconds(rest[i], True)
 
-    
     subprocess.Popen("termux-tts-speak 'prepare'", shell=True)
     currentAction = "prepare"
     beepsDone = [False, False, False]
@@ -220,19 +244,24 @@ def intervalTimer():
     quit = False
     while True:
         timeLeft = endTime-round(time.time())
+
         if currentAction == "work":
             color = "red"
         elif currentAction == "rest" or currentAction == "prepare":
             color = "green"
+
         if timeLeft <= 3 and not beepsDone[timeLeft-1]:
             playbeepWithOutPause()
             beepsDone[timeLeft-1] = True
+
         sys.stdout.write(
             "\u001b[1000D" + displayText((datetime.strptime("0:0", "%M:%S") + timedelta(seconds=timeLeft)).strftime("%M:%S"), color))
         sys.stdout.flush()
+
         if timeLeft <= 0:
             for i in range(3):
                 beepsDone[i] = False
+
             if currentAction == "prepare":
                 if intervalOption == "Interval repeat":
                     endTime = round(time.time()) + work
@@ -257,6 +286,7 @@ def intervalTimer():
                     endTime = round(time.time()) + rest[-intervals]
                 currentAction = "rest"
                 subprocess.Popen("termux-tts-speak 'rest'", shell=True)
+
         keyInput = sys.stdin.read(1)
         if keyInput == "q":
             quit = True
@@ -281,16 +311,24 @@ def clock():
         sys.stdout.write(displayText(
             datetime.now().strftime("%H:%M:%S"), "black"))
         sys.stdout.flush()
+
         if sys.stdin.read(1) == "q":
             break
 
 
+# This part enable sys.stdout.read(1)
+# to read one character without stopping.
 fd = sys.stdin.fileno()
 fl = fcntl.fcntl(fd, fcntl.F_GETFL)
 fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 old = tty.tcgetattr(fd)
 tty.setcbreak(fd)
+
+# \033[?25l makes curser invisible.
+# \033[?47 saves current window.
+# \u001b[0m reset colors.
 sys.stdout.write("\033[?25l\033[?47h\u001b[0m")
+
 option = json.loads(subprocess.getoutput(
     "termux-dialog radio -v 'Timer,Alarm,Clock,Interval'"))["text"]
 if option == "Timer":
@@ -301,5 +339,11 @@ if option == "Clock":
     clock()
 if option == "Interval":
     intervalTimer()
-sys.stdout.write("\033[?47l\u001b[0J\033[?25h")
+
+# \033[?47l loads window saved in the beginning.
+# \u001b[0J clears the screen.
+# \033[?25h makes curser visible.
+sys.stdout.write("\033[?47l\033[?25h")
+
+# Stop input mode
 tty.tcsetattr(fd, tty.TCSAFLUSH, old)
