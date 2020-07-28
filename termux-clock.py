@@ -130,6 +130,8 @@ def alarm(showTime=False, enableSnooze=False):
                     "termux-dialog confirm -t 'Turn off' -i ''", stdout=subprocess.PIPE, shell=True)
 
         if sys.stdin.read(1) == "q":
+            subprocess.call(
+                    "termux-notification-remove 1204", shell=True)
             break
         try:
             with open("/data/data/com.termux/files/home/termux-clock/alarmOutput.txt", "r") as f:
