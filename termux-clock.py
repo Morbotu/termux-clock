@@ -128,7 +128,7 @@ def alarm(showTime=False, enableSnooze=False):
         "--on-delete 'echo \"Alarm closed\" > /data/data/com.termux/files/home/termux-clock/alarmOutput.txt' " + "-i 1204"
 
     if enableSnooze:
-        notification += " --button2 'Snooze alarm'" + \
+        notification += " --button2 'Snooze alarm' " + \
             "--button2-action 'echo \"Alarm snoozed\" > /data/data/com.termux/files/home/termux-clock/alarmOutput.txt'"
 
     subprocess.call(notification, shell=True)
@@ -174,9 +174,11 @@ def alarm(showTime=False, enableSnooze=False):
 
 
 def alarmClock():
-    alarmTime = datetime.strptime(json.loads(subprocess.getoutput(
-        "termux-dialog time -t 'Alarm'"))["text"], "%H:%M")
-
+    alarmTime = json.loads(subprocess.getoutput(
+        "termux-dialog time -t 'Alarm'"))["text"]
+    if len([i for i in alarmTime.split(":") if i.isdigit()]) != 2:
+        return
+    alarmTime = datetime.strptime(alarmTime, "%H:%M")
     openSuperop = json.loads(subprocess.getoutput(
         "termux-dialog confirm -t 'Open superop' -i ''"))["text"]
 
