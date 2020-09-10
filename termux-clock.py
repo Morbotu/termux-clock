@@ -321,6 +321,7 @@ def clock():
         if sys.stdin.read(1) == "q":
             break
 
+subprocess.call("termux-wake-lock")
 
 # This part enable sys.stdout.read(1)
 # to read one character without stopping.
@@ -352,3 +353,5 @@ sys.stdout.write("\033[?47l\033[?25h")
 
 # Stop input mode
 tty.tcsetattr(fd, tty.TCSAFLUSH, old)
+
+subprocess.call("termux-wake-unlock")
