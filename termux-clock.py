@@ -131,7 +131,11 @@ def alarm(showTime=False, enableSnooze=False):
         notification += " --button2 'Snooze alarm' " + \
             "--button2-action 'echo \"Alarm snoozed\" > /data/data/com.termux/files/home/termux-clock/alarmOutput.txt'"
 
-    subprocess.call(notification, shell=True)
+    try:
+        subprocess.call(notification, shell=True)
+    except:
+        with open("/data/data/com.termux/files/home/termux-clock/log.txt", "w") as f:
+            f.write("Error: NotificationError at line 135\nLast call: subprocess.call(notification, shell=True)\n")
     while True:
         playbeep()
         if showTime:
@@ -194,7 +198,7 @@ def alarmClock():
         if datetime.now().strftime("%H:%M") == alarmTime.strftime("%H:%M"):
             snooze = alarm(True, True)
             if snooze:
-                alarmTime += timedelta(minutes=5)
+                alarmTime = datetime.now() + timedelta(minutes=5)
             else:
                 break
 
